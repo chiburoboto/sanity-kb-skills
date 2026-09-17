@@ -23,7 +23,7 @@ Check these. If one fails, open `blocked.md` and fix it first.
    - The public site URL, if the site is deployed and not behind a login.
 2. **Don't trust a zero.** A count of `0` or a result of `[]` often means the command was wrong, not that the dataset is empty. Before you believe it, check that:
    - the project id and dataset match the Studio the user actually edits, and you passed `--dataset` if there is more than one,
-   - the shell didn't strip the quotes from the query, which PowerShell does to double quotes,
+   - the shell or command shim didn't strip quotes from the query; use the tested quoting form or direct Node fallback in `cli.md`,
    - `count(*)` returns more than 0, which separates "empty dataset" from "wrong type name",
    - the documents are published and not only drafts. The CLI query may hide drafts, so check with the raw-perspective client in `api.md`.
 

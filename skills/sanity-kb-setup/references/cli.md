@@ -25,11 +25,11 @@ Found in `@sanity/cli` 8.11.0 under `sanity context`. Not in Sanity's public doc
 
 ## Quoting on Windows
 
-Two things break GROQ arguments on Windows. Both fail quietly, so check for them before trusting an empty result.
+Shell and command-shim argument handling can break GROQ arguments on Windows. Check these cases before trusting an empty result.
 
-- **PowerShell strips double quotes inside an argument.** `'count(*[_type == "product"])'` reaches the CLI as `_type == product`, and the query returns nothing, `0` or `[]`. It does this through `npx`, `pnpm exec` and direct Node alike. Write GROQ strings with single quotes and wrap the argument in double quotes. This form was tested in PowerShell and bash:
+- **Quotes can be lost while passing arguments through a command shim.** If `_type == "product"` reaches the CLI as `_type == product`, the query can return a misleading empty result. Behavior depends on the shell and launcher. In the Lark and Kettle test, the same double-quoted GROQ strings returned `[]` through `pnpm exec`, but four products through direct Node. Direct Node can bypass shim-related failures, but may still lose double quotes in Windows PowerShell 5.1. Use single-quoted GROQ strings with either launcher, and wrap the argument in double quotes. This form was tested in Windows PowerShell 5.1, through `npx` and direct Node, and in bash:
   ```
-  npx sanity documents query "count(*[_type == 'product'])"
+  npx sanity documents query "{'n': count(*[_type == 'product'])}"
   ```
 - **The `.cmd` shims behind `npx` and `pnpm exec` cut an argument at the first newline.** The API then reports `Invalid GROQ filter ... Unexpected end of query`. Pass the query on one line:
   - bash: `--query "$(tr '\n' ' ' < kb-query.groq | tr -s ' ')"`
@@ -37,7 +37,7 @@ Two things break GROQ arguments on Windows. Both fail quietly, so check for them
 
 - **The CLI prints "Query returned no results" for a bare `0`.** A count that is truly zero looks like an error. Wrap counts in an object, such as `"{'n': count(*[_type == 'product'])}"`, so you get `{"n": 0}` back.
 
-So save `kb-query.groq` with single-quoted strings, and collapse it to one line when you pass it. If a command still misbehaves through a shim, call the CLI directly with `node node_modules/sanity/bin/sanity <command>`.
+So save `kb-query.groq` with single-quoted strings, and collapse it to one line when you pass it. If a command still misbehaves through a shim, call the CLI directly with `node node_modules/sanity/bin/sanity <command>`. That gets past the shim. It doesn't undo quoting the shell itself already did, so keep the single quotes.
 
 Confirmed in testing: the dataset import accepts `pt::text()` and conditional projections (`_type == 'x' => { }`).
 

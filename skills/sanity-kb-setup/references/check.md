@@ -4,7 +4,7 @@ Run this after every build. The goal is to move the Knowledge Base from Built to
 
 | Evidence | Tells you | Misses |
 |---|---|---|
-| The source claims, from section 10 of the sheet and your own reading of the content | Which facts the sources disagree on | Nothing, if you read carefully |
+| The source claims, from section 10 of the sheet and your own reading of the content | Disagreements found in the material you inspected | Uninspected claims, contextual exceptions, and evidence of which claim is correct |
 | The entries the build wrote | Which claim the Knowledge Base actually kept | Whether anyone was told |
 | The issues list | Which disagreements the build raised | Everything it settled silently |
 

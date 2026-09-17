@@ -85,6 +85,8 @@ Resolving creates a standing instruction, the same as the dashboard's Resolve bu
 
 Use this only when no better write path exists, such as a Sanity MCP server the agent already has, or the user editing in Studio.
 
+The example below targets a published document. Execute that mutation only when the user has approved direct publication of the exact change. Draft mode targets `drafts.<id>` instead, as described below.
+
 ```js
 const data = await getProjectCliClient({
   apiVersion: 'v2025-08-15',
@@ -110,4 +112,5 @@ await data
 - `commit({ dryRun: true })` validates the whole transaction without writing.
 - Address array items by `_key`, never by index.
 - To write a draft instead of publishing, create `drafts.<id>` from the published document with `transaction.create(...)`, then patch that. If a draft already exists, patch it with its own `_rev`, and tell the user the draft holds other unpublished edits.
-- Patching only the published document while a draft exists leaves the old claim in the draft. Publishing that draft later brings the claim back. Patch both, each with its own revision.
+- In draft mode, edit only the draft. Do not patch the published document.
+- For an approved direct publish, inspect the existing draft separately. If it also contains the losing claim, include that correction in the approved change list and patch both documents in one transaction, each with its own reviewed revision. Preserve unrelated draft edits. If both edits are not approved, have the user reconcile the draft in Studio before publishing, since a later draft publication could restore the old claim.

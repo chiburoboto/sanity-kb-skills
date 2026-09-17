@@ -31,7 +31,7 @@ Find the symptom, tell the user what it means in one sentence, and give them the
 
 **A query returns `0` or `[]`.** Treat this as a suspect result until you have ruled out the command. In testing, the same query returned nothing through one shell and four products through another. Check in this order.
 
-1. Quoting. PowerShell strips double quotes inside an argument, so `_type == "product"` arrives as `_type == product` and matches nothing. Use single quotes inside the query. `cli.md` has the tested form.
+1. Quoting. Shell or command-shim argument handling can strip quotes, so `_type == "product"` arrives as `_type == product` and matches nothing. Use single quotes inside the query, or try the direct Node CLI fallback in `cli.md`.
 2. The target. Confirm the project id and dataset against `sanity.cli.ts` and the Studio the user edits. Pass `--dataset <name>` if the project has several.
 3. The CLI's own wording. `npx sanity documents query` prints "Query returned no results" for a bare `0`, which looks like a failure. Wrap counts in an object, such as `"{'n': count(*)}"`.
 4. The type name. If `count(*)` is above 0, the dataset has content and your filter is wrong. List the types with `"array::unique(*[]._type)"`.
@@ -45,7 +45,7 @@ Only after all five can you say the dataset is empty.
 
 ## Creating
 
-**"Organization is at its limit", for example 2 of 2 Knowledge Bases used.** The cap counts every Knowledge Base in the organisation, across all its projects. List them with `npx sanity context list --organization <org-id>` and show the table. First check whether one of them already belongs to this project, because then you should reuse it and no slot is needed. Otherwise give the user the options.
+**"Organization is at its limit", for example 2 of 2 Knowledge Bases used.** The cap counts every Knowledge Base in the organisation, across all its projects. List them with `npx sanity context list --organization <org-id>` and show the table. First check whether one matches the intended audience, purpose and sources; reusing it needs no new slot. Belonging to the same project alone is not enough. Otherwise give the user the options.
 - Delete one they name. Deleting is permanent and removes its entries, issues and instructions. Before they choose, check in the dashboard which Knowledge Base each MCP endpoint reads, so a working agent connection doesn't break.
 - Upgrade the plan. Sanity doesn't publish the numbers, so they check billing in Manage.
 - Use a different organisation, which has its own allowance. Client work usually belongs in the client's organisation anyway.

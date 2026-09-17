@@ -1,9 +1,9 @@
 ---
 name: sanity-kb-setup
 description: Set up a Sanity Context Knowledge Base end to end. Plans it from the repo (purpose, GROQ query, file sources), creates and builds it with the Sanity CLI, reads the entries the build wrote, prints the conflicts as A/B choices, resolves the ones the user picks, corrects the losing claims in the Sanity content, refreshes and rebuilds, then connects coding agents to it over MCP. Also unblocks the user when something is missing, such as a Sanity project, a login, an organisation token or a free Knowledge Base slot. Use whenever someone wants to set up, build, audit or fix a Sanity Knowledge Base, resolve its issues or conflicts, or connect Claude Code, Cursor, Codex or another agent to one, even if they only say "KB", "what did the build flag" or "pick the winners".
-compatibility: Needs Node 18 or later, a Sanity project with the `sanity` package installed, and `npx sanity login`.
+compatibility: Needs a Node version supported by the project's installed Sanity packages, a Sanity project with the `sanity` package installed, and `npx sanity login`. Tested with Sanity 6.14.0, which requires Node >=22.12.
 metadata:
-  version: "1.1.0"
+  version: "1.1.1"
 ---
 
 # Sanity Knowledge Base setup
@@ -29,7 +29,7 @@ Stages 2 to 5 are one flow. When a build finishes, go straight to stage 3. "The 
 Don't assume a fresh start. Before any stage, check what already exists.
 
 - `kb-setup.md` in the project means a plan exists. Read it. It records the Knowledge Base id once one is created.
-- `npx sanity context list --organization <org-id>` shows existing Knowledge Bases. If one matches this project, reuse it. Never create a second one for the same content.
+- `npx sanity context list --organization <org-id>` shows existing Knowledge Bases. Reuse one when its audience, purpose and sources match the intended plan. Avoid accidental duplicates; separate audiences or purposes can justify separate Knowledge Bases over the same content.
 - `npx sanity context imports list <kb-id>` shows which sources already imported. Don't add a source twice.
 
 Then say which state the Knowledge Base is in, using these words.

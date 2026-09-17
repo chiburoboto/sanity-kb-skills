@@ -20,7 +20,7 @@ There is no generic patch tool here on purpose. You know this project's schema, 
    - The guarded `@sanity/client` example in `api.md`. `ifRevisionId` makes the commit fail if anyone edited the document after you read it, so you can't overwrite a newer edit. Run it with `dryRun: true` first.
    - The user makes the edits in Studio from your change list.
 
-   If a document has a draft, tell the user before touching it. Patching only the published document leaves the old claim in the draft, and publishing that draft later brings it back. Patch both, each with its own revision, or let the user handle it in Studio.
+   If a document has a draft, show its current value separately from the published value in the change list. In draft mode, edit only the draft with its own revision guard; leave the published document untouched. For an approved direct publish, include any necessary correction to the existing draft in the approved change list, then patch both in one transaction with their respective revision guards. Preserve unrelated draft edits. If the user has not approved both changes, let them reconcile the draft in Studio before publishing; otherwise a later draft publication could restore the losing claim.
 5. **Handle what isn't a dataset field.**
    - For a losing claim in a file source, correct the file, delete the old import and add the new file. Files never re-sync.
    - For a losing claim hardcoded in the site's code, report the file and line.
