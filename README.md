@@ -1,5 +1,7 @@
 # sanity-kb-skills
 
+> **This skill has moved.** It now lives in [`robotostudio/team-memory`](https://github.com/robotostudio/team-memory/tree/main/skills/sanity-kb-setup), and fixes land there. The copy in this repo is version 1.1.1 and is no longer updated. Install the current one with `npx skills add robotostudio/team-memory --skill sanity-kb-setup`.
+
 One agent skill, `sanity-kb-setup`. It takes a Sanity project to a Sanity Context Knowledge Base that coding agents can read over MCP, and it checks that what the Knowledge Base says is actually true.
 
 It follows the open [Agent Skills](https://agentskills.io/specification) format, so it works in Claude Code, Codex, Cursor, GitHub Copilot, Gemini CLI and other agents that read `SKILL.md` folders.
@@ -30,19 +32,16 @@ When something is missing or a result looks wrong, `references/blocked.md` tells
 Any agent, with Vercel's [skills CLI](https://github.com/vercel-labs/skills):
 
 ```bash
-npx skills add chiburoboto/sanity-kb-skills
+npx skills add robotostudio/team-memory --skill sanity-kb-setup
 ```
 
-Add `-a codex cursor` to pick agents, or `-g` to install for every project.
+`team-memory` holds several skills, so `--skill` picks this one. Add `-a codex cursor` to pick agents, or `-g` to install for every project.
 
-Claude Code, as a plugin:
+Roboto teammates who use `roboto-mem` don't need the command. `roboto-mem sync` copies every skill in `team-memory` into `~/.claude/skills` at the next session start.
 
-```
-/plugin marketplace add chiburoboto/sanity-kb-skills
-/plugin install sanity-kb-setup@sanity-kb-skills
-```
+The Claude Code plugin route (`/plugin marketplace add chiburoboto/sanity-kb-skills`) still installs from this repo, so it gives the old 1.1.1 copy. `team-memory` has no plugin manifest. Use the command above.
 
-By hand, copy `skills/sanity-kb-setup/` into the folder your agent reads.
+By hand, copy [`skills/sanity-kb-setup/`](https://github.com/robotostudio/team-memory/tree/main/skills/sanity-kb-setup) from `team-memory` into the folder your agent reads.
 
 | Agent | Project folder | User folder |
 |---|---|---|
