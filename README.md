@@ -28,7 +28,7 @@ When something is missing, `references/blocked.md` tells the agent how to get yo
 Any agent, with Vercel's [skills CLI](https://github.com/vercel-labs/skills):
 
 ```bash
-npx skills add <owner>/sanity-kb-skills
+npx skills add chiburoboto/sanity-kb-skills
 ```
 
 Add `-a codex cursor` to pick agents, or `-g` to install for every project.
@@ -36,7 +36,7 @@ Add `-a codex cursor` to pick agents, or `-g` to install for every project.
 Claude Code, as a plugin:
 
 ```
-/plugin marketplace add <owner>/sanity-kb-skills
+/plugin marketplace add chiburoboto/sanity-kb-skills
 /plugin install sanity-kb-setup@sanity-kb-skills
 ```
 
@@ -90,4 +90,4 @@ The scripts are plain Node with no dependencies of their own. They borrow the Sa
 
 - A build doesn't catch every conflict, and two builds of the same sources can differ. The skill reports the conflicts it expected and the build missed.
 - The CLI's `context` commands and the issues API aren't in Sanity's public docs, so they may change. The skill falls back to the dashboard when they do.
-- Before publishing this repo, replace `<owner>`, add a LICENSE, and run `claude plugin validate .` and `npx skills add ./ --list` from the repo root. Neither installer has been run against this exact layout yet.
+- `npx skills add` and `claude plugin validate` have both been run against this layout. There is no LICENSE file yet, so others have no stated right to reuse the code.
