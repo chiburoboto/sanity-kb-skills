@@ -10,7 +10,7 @@
     {
       "name": "sanity-kb-setup",
       "description": "Plan, create, check and clean up a Sanity Context Knowledge Base, then connect coding agents to it.",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "source": "./",
       "strict": false,
       "skills": [

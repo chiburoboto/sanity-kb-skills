@@ -5,27 +5,27 @@ Taken from `robotostudio/turbo-start-sanity` `apps/studio/schema.json`. Clients 
 ## Query
 
 ```groq
-*[_type in ["faq", "page", "homePage", "blogIndex", "settings"]]{
+*[_type in ['faq', 'page', 'homePage', 'blogIndex', 'settings']]{
   _type,
-  _type == "faq" => {
-    "question": title,
-    "answer": pt::text(richText)
+  _type == 'faq' => {
+    'question': title,
+    'answer': pt::text(richText)
   },
-  _type in ["page", "homePage", "blogIndex"] => {
+  _type in ['page', 'homePage', 'blogIndex'] => {
     title,
     description,
-    "blocks": pageBuilder[]{
+    'blocks': pageBuilder[]{
       _type,
       badge,
       eyebrow,
       title,
       subtitle,
-      "body": pt::text(richText),
-      "cards": cards[]{ title, "body": pt::text(richText) },
+      'body': pt::text(richText),
+      'cards': cards[]{ title, 'body': pt::text(richText) },
       caption
     }
   },
-  _type == "settings" => {
+  _type == 'settings' => {
     siteTitle,
     siteDescription,
     contactEmail

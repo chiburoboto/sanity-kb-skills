@@ -1,16 +1,16 @@
 # sanity-kb-skills
 
-One agent skill, `sanity-kb-setup`. It takes a Sanity project from nothing to a clean Sanity Context Knowledge Base that coding agents can read over MCP.
+One agent skill, `sanity-kb-setup`. It takes a Sanity project to a Sanity Context Knowledge Base that coding agents can read over MCP, and it checks that what the Knowledge Base says is actually true.
 
 It follows the open [Agent Skills](https://agentskills.io/specification) format, so it works in Claude Code, Codex, Cursor, GitHub Copilot, Gemini CLI and other agents that read `SKILL.md` folders.
 
 ## What a run looks like
 
-You say "set up a Knowledge Base for this project". The agent then works through six stages and stops where a person has to decide.
+You say "set up a Knowledge Base for this project". The agent works through six stages and stops where a person has to decide.
 
-1. **Plan.** It reads the repo and writes `kb-setup.md` and `kb-query.groq`. It covers the purpose, one GROQ query, the file sources and the expected outline. You approve the plan.
-2. **Create.** It creates the Knowledge Base with the Sanity CLI, adds the sources and builds.
-3. **Check.** When the build ends, it prints every conflict as a choice.
+1. **Plan.** It reads the repo and writes `kb-setup.md` and `kb-query.groq`. They cover the purpose, one GROQ query, the file sources, the expected outline and the disagreements it already spotted in the content. You approve the plan.
+2. **Create.** It creates the Knowledge Base with the Sanity CLI, adds the sources and builds. If one already exists for the project, it reuses it.
+3. **Check.** It reads the entries the build wrote and compares three things, which are what the sources claim, what each entry says, and which issues the build raised. Then it prints every disagreement as a choice, including the ones the build settled without telling anyone.
    ```
    1. Return window
       A. 14 days   ← the returns policy says this
@@ -18,10 +18,12 @@ You say "set up a Knowledge Base for this project". The agent then works through
    ```
    You reply `1A 2A 3B`.
 4. **Resolve.** It resolves your picks, which creates the standing instructions.
-5. **Fix content.** It finds every copy of each losing claim in the dataset and corrects it, as drafts unless you ask for a direct publish. Then it refreshes, rebuilds and checks again.
-6. **Connect.** It walks you through the MCP endpoint and the token, tests the endpoint, and writes the config for your agent.
+5. **Fix content.** It finds where each losing claim lives, shows you the exact edits, and writes them guarded by the revision it reviewed, as drafts unless you ask for a direct publish. Then it refreshes, rebuilds and checks again.
+6. **Connect.** It walks you through the MCP endpoint and the token, confirms the endpoint serves this Knowledge Base and not another one, and writes the config for your agent.
 
-When something is missing, `references/blocked.md` tells the agent how to get you past it. It covers a missing Sanity project, a login, an organisation at its Knowledge Base limit, an organisation token, 401 and 403 errors, and more.
+You can stop after stage 3. If you keep conflicts on purpose, for a demo or to test a checking tool, the skill records that and skips stages 4 and 5.
+
+When something is missing or a result looks wrong, `references/blocked.md` tells the agent how to get you past it. It covers a missing Sanity project, a login, an empty query result that isn't really empty, an organisation at its Knowledge Base limit, an organisation token, and 401, 403 and 409 errors.
 
 ## Install
 
@@ -62,32 +64,35 @@ For claude.ai, zip the `sanity-kb-setup` folder and upload it under Settings, th
 
 ## How the skill is laid out
 
-`SKILL.md` is a short router. It holds the stage table, five facts about Knowledge Bases and the ground rules. The agent opens one reference file per stage, so a resolve-only run never loads the planning guide.
+This is an instructions-first skill. Most of its value is in what to check and which mistakes to avoid, so the agent does the work with the Sanity CLI and the project's own files. `SKILL.md` is a short router, and the agent opens one reference file per stage.
 
 ```
 skills/sanity-kb-setup/
   SKILL.md
   references/
     plan.md  create.md  check.md  resolve.md  fix-content.md
-    connect-agents.md  blocked.md  cli.md
+    connect-agents.md  blocked.md  cli.md  api.md
     type-roles-and-queries.md  turbo-start-sanity.md
   assets/kb-setup-template.md
-  scripts/
-    kb-issues.mjs  kb-resolve.mjs  kb-find.mjs  kb-patch.mjs  kb-mcp-check.mjs
+  scripts/kb-issues.mjs
 ```
 
-The scripts are plain Node with no dependencies of their own. They borrow the Sanity CLI from the project they run in.
+- `api.md` has short `@sanity/client` examples for what the CLI can't do, which is reading entries, listing and resolving issues, and editing content with a revision guard. Each example was run against a real Knowledge Base.
+- `scripts/kb-issues.mjs` is the one bundled script, and it is optional. It lists issues. Earlier versions shipped five scripts. The rest were removed because a generic patcher and a generic text search add risk and duplicate what an agent does better with the real schema in front of it.
 
 ## Safety
 
 - The agent asks before creating a Knowledge Base, before resolving, and before writing to the dataset.
 - It never picks which claim is true. A person does.
-- Content fixes default to drafts.
+- Every content edit carries the revision the agent reviewed, so it can't overwrite a newer edit. Edits default to drafts.
+- It never seeds or imports content into a real project. Seeding is for demo projects only.
 - It never deletes a Knowledge Base unless you name it.
 - Tokens stay in environment variables.
 
 ## Things to know
 
-- A build doesn't catch every conflict, and two builds of the same sources can differ. The skill reports the conflicts it expected and the build missed.
-- The CLI's `context` commands and the issues API aren't in Sanity's public docs, so they may change. The skill falls back to the dashboard when they do.
-- `npx skills add` and `claude plugin validate` have both been run against this layout. There is no LICENSE file yet, so others have no stated right to reuse the code.
+- A build doesn't catch every conflict, and two builds of the same sources can differ. In testing, a build wrote "we ship to the US" into an entry and raised no issue. That is why stage 3 reads the entries.
+- The CLI's `context` commands and the `client.context` API aren't in Sanity's public docs, so they may change. The skill falls back to the dashboard when they do.
+- On Windows, PowerShell strips double quotes inside a GROQ argument, which turns a good query into an empty result. `references/cli.md` has the tested form.
+- `SKILL.md` uses the `compatibility` and `metadata` fields from the Agent Skills specification. Some older validators reject `compatibility`. The specification allows it.
+- There is no LICENSE file yet, so others have no stated right to reuse the code.

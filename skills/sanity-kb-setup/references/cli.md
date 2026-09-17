@@ -23,14 +23,23 @@ Found in `@sanity/cli` 8.11.0 under `sanity context`. Not in Sanity's public doc
 
 `context get --json` returns `state`, `openIssueCount`, `instructionCount`, `lastChangedAt` (the last build), `pendingChanges`, `sourceUsage` and the refresh schedule.
 
-## Passing the query
+## Quoting on Windows
 
-Pass it as **one line**. On Windows, `pnpm exec` and `npx` run through `.cmd` shims that cut an argument at the first newline, and the API then reports `Invalid GROQ filter ... Unexpected end of query` at the position where the first line ends. Collapse the saved file:
+Two things break GROQ arguments on Windows. Both fail quietly, so check for them before trusting an empty result.
 
-- bash: `--query "$(tr '\n' ' ' < kb-query.groq | tr -s ' ')"`
-- PowerShell: `--query ((Get-Content -Raw kb-query.groq) -replace '\s+', ' ')`
+- **PowerShell strips double quotes inside an argument.** `'count(*[_type == "product"])'` reaches the CLI as `_type == product`, and the query returns nothing, `0` or `[]`. It does this through `npx`, `pnpm exec` and direct Node alike. Write GROQ strings with single quotes and wrap the argument in double quotes. This form was tested in PowerShell and bash:
+  ```
+  npx sanity documents query "count(*[_type == 'product'])"
+  ```
+- **The `.cmd` shims behind `npx` and `pnpm exec` cut an argument at the first newline.** The API then reports `Invalid GROQ filter ... Unexpected end of query`. Pass the query on one line:
+  - bash: `--query "$(tr '\n' ' ' < kb-query.groq | tr -s ' ')"`
+  - PowerShell: `--query ((Get-Content -Raw kb-query.groq) -replace '\s+', ' ')`
 
-Confirmed in testing: the dataset import accepts `pt::text()` and conditional projections (`_type == "x" => { }`).
+- **The CLI prints "Query returned no results" for a bare `0`.** A count that is truly zero looks like an error. Wrap counts in an object, such as `"{'n': count(*[_type == 'product'])}"`, so you get `{"n": 0}` back.
+
+So save `kb-query.groq` with single-quoted strings, and collapse it to one line when you pass it. If a command still misbehaves through a shim, call the CLI directly with `node node_modules/sanity/bin/sanity <command>`.
+
+Confirmed in testing: the dataset import accepts `pt::text()` and conditional projections (`_type == 'x' => { }`).
 
 ## Transient errors
 
@@ -39,24 +48,12 @@ Confirmed in testing: the dataset import accepts `pt::text()` and conditional pr
 ## What the CLI can't do
 
 - **Create an MCP endpoint.** Endpoints are organisation documents the client can read but not create. Use the Context dashboard: New endpoint, pick the Knowledge Base only.
-- **Resolve issues.** There is no CLI command. `scripts/kb-resolve.mjs` wraps `@sanity/client`'s `context.issues.resolve` (`resolution: 'keep_existing' | 'accept_new'`), `dismiss` and `reopen`. Resolving creates the standing instruction. Choosing which claim is true is a person's call.
+- **Read entries, list issues, resolve issues.** No CLI command exists for these. `api.md` has short `@sanity/client` examples. `scripts/kb-issues.mjs` lists issues.
 - **Add instructions with custom wording.** The client lists them. Write them in the dashboard.
 
 ## Issue states
 
-`kb-issues.mjs --status` takes `open`, `accepted` (resolved) or `rejected` (dismissed). Only `conflict` issues can be resolved. `update_required` suggestions and `gap` issues are applied in the dashboard or dismissed. `openIssueCount` in `context get` can be lower than the number of open issues, because it leaves out some suggestions.
-
-## Bundled scripts
-
-All five borrow the project's Sanity CLI and its login, except `kb-mcp-check.mjs`, which uses the two environment variables. Run them from the Sanity project folder.
-
-| Script | Wraps |
-|---|---|
-| `kb-issues.mjs` | `client.context.issues.list` |
-| `kb-resolve.mjs` | `client.context.issues.resolve`, `dismiss`, `reopen` |
-| `kb-find.mjs` | A fetch of every non-system document, searched for a string |
-| `kb-patch.mjs` | A transaction of `set` and `unset` patches, on drafts or published documents |
-| `kb-mcp-check.mjs` | MCP over HTTP: `initialize`, `tools/list`, `initial_context` |
+`scripts/kb-issues.mjs --status` takes `open`, `accepted` (resolved) or `rejected` (dismissed). Only `conflict` issues can be resolved. `update_required` suggestions and `gap` issues are applied in the dashboard or dismissed. `openIssueCount` in `context get` can be lower than the number of open issues, because it leaves out some suggestions.
 
 ## Permissions
 

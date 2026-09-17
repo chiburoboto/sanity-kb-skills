@@ -44,7 +44,7 @@ Files never re-sync. Delete and re-upload on every change.
 
 ## 3. Build
 
-Build with no instructions, so every conflict appears as an issue: `npx sanity context build <kb-id> --watch`, or **Build entries** in the dashboard.
+Build with no instructions, so they can't hide a conflict. A build still misses some conflicts, so read the entries afterwards: `npx sanity context build <kb-id> --watch`, or **Build entries** in the dashboard.
 
 ## 4. Expected outline
 
@@ -53,8 +53,9 @@ Build with no instructions, so every conflict appears as an issue: `npx sanity c
 ## 5. After the first build
 
 - Compare the real outline with section 4. A missing topic means a missing source or a purpose that doesn't reach it.
-- Work the issues list. For each one, fix the source document, then add one instruction per corrected fact, tied to every document that states it.
-- Tie any instruction that depends on a file to a dataset document too, so re-uploading the file doesn't archive it.
+- Read the entries. For each disagreement in section 10, note which claim the entry kept and whether the build raised an issue.
+- A person picks the winner of each conflict. Resolve those picks, which creates the instructions. Don't write instructions by hand first.
+- Correct the losing claims in the source documents, publish, refresh, then rebuild.
 
 ## 6. MCP endpoint
 

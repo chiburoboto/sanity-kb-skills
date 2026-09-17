@@ -15,7 +15,7 @@ Give every document type exactly one role, with a one-line reason. If a type doe
 
 ## Projection rules
 
-- **Keep text, drop everything else.** Slugs, images, video, buttons, links, icons, SEO and Open Graph fields add noise and no facts.
+- **Keep every field that states a fact, whatever its type.** That means text, and also booleans and numbers such as `dishwasherSafe`, a capacity, a weight or a warranty length. In testing, a `dishwasherSafe: true` flag contradicted the care text, and the build could only see that because the query kept the flag. Drop slugs, images, video, buttons, links, icons, SEO and Open Graph fields, which add noise and no facts.
 - **Convert Portable Text** with `pt::text(field)` so the build reads prose, not block JSON.
 - **Page-builder arrays**: project each block's text fields and keep `_type`, so an entry can say which kind of block a claim came from. Fields a block doesn't have come back as null, which is harmless.
 - **Don't follow references to documents the query already reads.** If FAQ blocks reference FAQ documents and the query reads FAQ documents directly, following the reference indexes each answer twice and muddies citations.
@@ -26,10 +26,10 @@ Give every document type exactly one role, with a one-line reason. If a type doe
 One query, one projection branch per type:
 
 ```groq
-*[_type in ["typeA", "typeB"]]{
+*[_type in ['typeA', 'typeB']]{
   _type,
-  _type == "typeA" => { title, "body": pt::text(body) },
-  _type == "typeB" => { name, spec, warranty }
+  _type == 'typeA' => { title, 'body': pt::text(body) },
+  _type == 'typeB' => { name, spec, warranty }
 }
 ```
 
